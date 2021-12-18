@@ -52,30 +52,16 @@ public class LanguageHelper {
     public static String getItemName(final ItemStack item, final String locale) {
         // Potion & SpawnEgg & Player Skull
         if (item.getType() == Material.POTION || item.getType() == Material.SPLASH_POTION || item.getType() == Material.LINGERING_POTION || item.getType() == Material.TIPPED_ARROW) {
-            //final PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
-            //final PotionType type = potionMeta.getBasePotionData().getType();
-//System.out.println("getItemName()="+getItemUnlocalizedName(item.getType())+".effect."+((PotionMeta) item.getItemMeta()).getBasePotionData().getType().toString().toLowerCase());
-            return translateToLocal( getItemUnlocalizedName(item.getType())+".effect."+((PotionMeta) item.getItemMeta()).getBasePotionData().getType().toString().toLowerCase(), locale);
             
-        /*switch (item.getType()) {
-            case SPLASH_POTION:
-                return getItemUnlocalizedName(item.getType());
-                return LanguageHelper.translateToLocal(getUnlocalizedSplashName(itemStack), locale);
-            case LINGERING_POTION:
-                return LanguageHelper.translateToLocal(getUnlocalizedLingeringName(itemStack), locale);
-            case TIPPED_ARROW:
-                return LanguageHelper.translateToLocal(getUnlocalizedArrowName(itemStack), locale);
-            default:
-                break;
-        }*/
+            return translateToLocal( getItemUnlocalizedName(item.getType())+".effect."+((PotionMeta) item.getItemMeta()).getBasePotionData().getType().toString().toLowerCase(), locale);
 
-
-            //return EnumPotionEffect.getLocalizedName(item, locale);
         } else if (item.getType() == Material.PLAYER_HEAD || item.getType() == Material.PLAYER_WALL_HEAD) { // is player's skull
+           
             return getPlayerSkullName(item, locale);
+            
         }
 
-        return translateToLocal(getItemUnlocalizedName(item.getType()), locale);
+        return getMaterialName(item.getType(), locale);
     }
     
     
@@ -87,7 +73,7 @@ public class LanguageHelper {
      * @return The localized name. if the item doesn't have a localized name, this method will return the unlocalized name of it. Except Potion! For Potions use getItemName!
      */
     public static String getMaterialName(final Material mat, final String locale) {
-        return translateToLocal(getItemUnlocalizedName(mat), locale);
+        return translateToLocal(mat.toString(), getItemUnlocalizedName(mat), locale);
     }
 
     
@@ -95,9 +81,10 @@ public class LanguageHelper {
     private static String getPlayerSkullName(final ItemStack skull, final String locale) {
         SkullMeta meta = (SkullMeta) skull.getItemMeta();
         if (meta!=null && meta.hasOwner()) {
-            return String.format(LanguageHelper.translateToLocal("block.minecraft.player_head.named", locale),
-                    meta.getOwningPlayer().getName());
-        } else return LanguageHelper.translateToLocal("block.minecraft.player_head", locale);
+            return String.format(LanguageHelper.translateToLocal(skull.getType().toString(), "block.minecraft.player_head.named", locale), meta.getOwningPlayer().getName());
+        } else {
+            return LanguageHelper.translateToLocal(skull.getType().toString(), "block.minecraft.player_head", locale);
+        }
     }    /**
      * Return the localized name of the item.
      *
@@ -138,7 +125,7 @@ public class LanguageHelper {
      * @return The localized name. if the biome doesn't have a localized name, this method will return the unlocalized name of it.
      */
     public static String getBiomeName(final Biome biome, final String locale) {
-        return translateToLocal(getBiomeUnlocalizedName(biome), locale);
+        return translateToLocal(biome.toString(), getBiomeUnlocalizedName(biome), locale);
     }
 
     /**
@@ -175,35 +162,24 @@ public class LanguageHelper {
      * Return the display name of the entity.
      *
      * @param entity The entity
-     * @param locale The language of the entity(if the entity doesn't have a customized name, the method will return the name of the entity in this language)
-     * @return The name of the entity
-     */
-    public static String getEntityDisplayName(final Entity entity, final String locale) {
-        return entity.getCustomName() != null ? entity.getCustomName() :
-                getEntityName(entity, locale);
-    }
-
-    /**
-     * Return the display name of the entity.
-     *
-     * @param entity The entity
      * @param player The receiver of the name
      * @return The name of the entity
      */
     public static String getEntityDisplayName(final Entity entity, final Player player) {
         return getEntityDisplayName(entity, LocaleHelper.getPlayerLanguage(player));
     }
-
+    
     /**
-     * Return the localized name of the entity.
+     * Return the display name of the entity.
      *
      * @param entity The entity
-     * @param locale The language of the item
-     * @return The localized name. if the entity doesn't have a localized name, this method will return the unlocalized name of it.
+     * @param locale The language of the entity(if the entity doesn't have a customized name, the method will return the name of the entity in this language)
+     * @return The name of the entity
      */
-    public static String getEntityName(final Entity entity, final String locale) {
-        return translateToLocal(getEntityUnlocalizedName(entity), locale);
+    public static String getEntityDisplayName(final Entity entity, final String locale) {
+        return ( entity.getCustomName() != null && entity.isCustomNameVisible() ) ? entity.getCustomName() :  getEntityName(entity, locale);
     }
+
 
     /**
      * Return the localized name of the entity.
@@ -215,6 +191,22 @@ public class LanguageHelper {
     public static String getEntityName(final Entity entity, final Player player) {
         return getEntityName(entity, LocaleHelper.getPlayerLanguage(player));
     }
+    
+    /**
+     * Return the localized name of the entity.
+     *
+     * @param entity The entity
+     * @param locale The language of the item
+     * @return The localized name. if the entity doesn't have a localized name, this method will return the unlocalized name of it.
+     */
+    public static String getEntityName(final Entity entity, final String locale) {
+        //return translateToLocal(entity.getType().toString(), getEntityUnlocalizedName(entity), locale);
+        //if (entity.getType()==EntityType.DROPPED_ITEM) {
+            //
+        //}
+        return getEntityName(entity.getType(), locale);
+    }
+
 
     /**
      * Return the localized name of the entity.
@@ -224,7 +216,7 @@ public class LanguageHelper {
      * @return The localized name. if the entity doesn't have a localized name, this method will return the unlocalized name of it.
      */
     public static String getEntityName(final EntityType entityType, final String locale) {
-        return translateToLocal(getEntityUnlocalizedName(entityType), locale);
+        return translateToLocal(entityType.toString(), getEntityUnlocalizedName(entityType), locale);
     }
 
     /**
@@ -442,6 +434,12 @@ public class LanguageHelper {
      * @param entityType The EntityType of the entity
      * @return The unlocalized name. If the entity doesn't have a unlocalized name, this method will return the name of the EntityType.
      */
+    
+    
+    /*
+    "entity.minecraft.experience_bottle": "Thrown Bottle o' Enchanting",
+    "entity.minecraft.experience_orb": "Experience Orb",
+    */
     public static String getEntityUnlocalizedName(final EntityType entityType) {
         //EnumEntity enumEntity = EnumEntity.get(entityType);
         //return enumEntity != null ? enumEntity.getUnlocalizedName() : entityType.toString();
@@ -508,7 +506,12 @@ public class LanguageHelper {
      * @param locale          The language to be translated to.
      * @return The localized entry. If the localized entry doesn't exist, it will first look up the fallback language map. If the entry still doesn't exist, then return the unlocalized name.
      */
+    @Deprecated
     public static String translateToLocal(final String unlocalizedName, final String locale) {
+        return translateToLocal(unlocalizedName, unlocalizedName, locale);
+    }
+    
+    public static String translateToLocal(final String sourceName, final String unlocalizedName, final String locale) {
 //System.out.println("translateToLocal() unlocalizedName="+unlocalizedName);
 //final Map<String, String> langMap = EnumLang.get(locale.toLowerCase()).getMap();
 
@@ -521,6 +524,6 @@ public class LanguageHelper {
             if (result == null || result.isEmpty())// when fallback language doesn't exist
                 result = EnumLang.EN_US.getMap().get(unlocalizedName);
         }
-        return result == null ? unlocalizedName : result;
+        return result == null ? sourceName : result;
     }
 }

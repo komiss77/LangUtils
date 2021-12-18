@@ -1,4 +1,4 @@
 name: LangUtils
-version: 4
+version: 4.1
 main: com.meowj.langutils.LangUtils
-api-version: 1.16
+api-version: 1.18
